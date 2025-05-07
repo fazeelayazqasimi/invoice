@@ -110,19 +110,29 @@ elif sidebar_option == "Recent Invoices":
     st.write(f"Total Results: {len(filtered)}")
 
     for inv in filtered[::-1]:
-        with st.expander(f"📄 {inv['order_number']} - {inv['name']} ({inv['date']})"):
-            st.write(f"📅 Date/Time: {inv['timestamp']}")
-            st.write(f"🛒 Platform: {inv['platform']}")
-            st.write(f"📞 Contact: {inv['contact']}")
-            st.write(f"🏠 Address: {inv['address']}")
-            for idx, p in enumerate(inv.get("products", [])):
-                st.markdown(f"**Product {idx+1}:** {p['product']}")
-                st.write(f"IMEI: {p['imei']}")
-                st.write(f"Qty: {p['qty']}, Price: {p['price']}")
+       with st.expander(f"📄 {inv['order_number']} - {inv['name']} ({inv['date']})"):
+            col1, col2 = st.columns(2)
+            with col1:
+                st.write(f"📅 **Date/Time:** {inv['timestamp']}")
+                st.write(f"🛒 **Platform:** {inv['platform']}")
+                st.write(f"📞 **Contact:** {inv['contact']}")
+            with col2:
+                st.write(f"🏠 **Address:** {inv['address']}")
+                st.write(f"💵 **Advance:** {inv['advance']} | **COD:** {inv['cod']}")
+                st.write(f"🧮 **Total:** {inv['total']}")
 
-            st.write(f"💵 Advance: {inv['advance']}, COD: {inv['cod']}")
-            st.write(f"🧮 Total: {inv['total']}")
+            # Show products in table format
+            if inv.get("products"):
+                product_data = [{
+                    "Product": p["product"],
+                    "IMEI": p["imei"],
+                    "Qty": p["qty"],
+                    "Price": p["price"]
+                } for p in inv["products"]]
+                st.markdown("### 📦 Product Details")
+                st.table(product_data)
 
+            # Download button
             pdf = generate_pdf(inv)
             st.download_button(
                 f"📥 Download Invoice PDF ({inv['order_number']})",
